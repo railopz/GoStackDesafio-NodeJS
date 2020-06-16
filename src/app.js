@@ -8,6 +8,7 @@ app.use(express.json());
 app.use(cors());
 
 const repositories = [];
+const likeUsers = [];
 
 app.get("/repositories", (request, response) => {
   return response.status(200).json(repositories);
@@ -80,7 +81,15 @@ app.post("/repositories/:id/like", (request, response) => {
 
   const { title, url, techs, like } = repositories.find(rep => rep.id === id);
 
- 
+  const { user_name } = request.headers;
+
+  const like_user = {
+    id: uuid(),
+    repository_id: id,
+    user_name
+  }
+
+  likeUsers.push(like_user);
 
   const repository = {
     id,
@@ -94,7 +103,16 @@ app.post("/repositories/:id/like", (request, response) => {
 
   return response.status(200).json(repository);
 
+});
 
+app.get("/repositories/:id/likes", (request, response) => {
+  const { id } = request.params;
+
+  const results = id
+    ? likeUsers.filter(like => like.repository_id.includes(id))
+    : 'Repository has no like.';
+
+    return response.status(200).json(results);
 });
 
 module.exports = app;
